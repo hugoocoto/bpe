@@ -51,12 +51,13 @@ predict(size_t tok)
         for (i = 0; i < len; i++) {
                 if (tokens[i].lhs == tok) {
                         arrput(matches, tokens[i]);
-                        total_prob += hmget(countmap, i);
+                        total_prob += hmget(countmap, i) + 1;
                 }
         }
 
         if (total_prob == 0) {
-                return 1;
+                arrfree(matches);
+                return 2;
         }
 
         size_t index = rand() % arrlen(matches);
@@ -64,14 +65,18 @@ predict(size_t tok)
         // TODO: chose by probability
 
         if (matches[index].lhs == matches[index].rhs) {
-                print_tokenlit(stdout, matches[index]);
+                arrfree(matches);
                 return 0;
         }
 
         if (predict(hmget(indexmap, matches[index]))) {
-                print_tokenlit(stdout, tokens[matches[index].lhs]);
-                predict(matches[index].rhs);
+                if (predict(matches[index].rhs)) {
+                        print_tokenlit(stdout, matches[index]);
+                        arrfree(matches);
+                        return 1;
+                }
         }
+        arrfree(matches);
         return 0;
 }
 
@@ -309,17 +314,28 @@ main(int argc, char *argv[])
                 fclose(fout);
         }
 
-        printf("Predict phrases by 'A'\n");
-        predict('e'); putchar(10);
-        predict('e'); putchar(10);
-        predict('e'); putchar(10);
-        predict('e'); putchar(10);
-        predict('e'); putchar(10);
-        predict('e'); putchar(10);
-        predict('e'); putchar(10);
-        predict('e'); putchar(10);
-        predict('e'); putchar(10);
-        predict('e'); putchar(10);
+        char c = 'e';
+        printf("Predict phrases by '%c'\n", c);
+        predict(c);
+        putchar(10);
+        predict(c);
+        putchar(10);
+        predict(c);
+        putchar(10);
+        predict(c);
+        putchar(10);
+        predict(c);
+        putchar(10);
+        predict(c);
+        putchar(10);
+        predict(c);
+        putchar(10);
+        predict(c);
+        putchar(10);
+        predict(c);
+        putchar(10);
+        predict(c);
+        putchar(10);
 
         // free as in freedom
         arrfree(toktext);
